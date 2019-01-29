@@ -93,7 +93,7 @@ This feature is beta and enabled by default in v1.9.
 
 ### Example
 
-The schema in [`crd-validation.yaml`](./artifacts/examples/crd-validation.yaml) applies the following validation on the custom resource:
+The schema in [`crd-validation.yaml`](artifacts/examples/sub/crd-validation.yaml) applies the following validation on the custom resource:
 `spec.replicas` must be an integer and must have a minimum value of 1 and a maximum value of 10.
 
 In the above steps, use `crd-validation.yaml` to create the CRD:
@@ -114,7 +114,7 @@ This feature is [alpha](https://v1-10.docs.kubernetes.io/docs/tasks/access-kuber
 
 ### Example
 
-The CRD in [`crd-status-subresource.yaml`](./artifacts/examples/crd-status-subresource.yaml) enables the `/status` subresource
+The CRD in [`crd-status-subresource.yaml`](artifacts/examples/sub/crd-status-subresource.yaml) enables the `/status` subresource
 for custom resources.
 This means that [`UpdateStatus`](./controller.go#L330) can be used by the controller to update only the status part of the custom resource.
 

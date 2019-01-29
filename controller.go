@@ -275,6 +275,8 @@ func (c *Controller) syncHandler(key string) error {
 	// If the resource doesn't exist, we'll create it
 	if errors.IsNotFound(err) {
 		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Create(newDeployment(foo))
+		//创建的逻辑
+		//c.kubeclientset.AppsV1().Deployments(foo.Namespace).Get(foo.Name)
 	}
 
 	// If an error occurs during Get/Create, we'll requeue the item so we can
@@ -297,6 +299,11 @@ func (c *Controller) syncHandler(key string) error {
 	// should update the Deployment resource.
 	if foo.Spec.Replicas != nil && *foo.Spec.Replicas != *deployment.Spec.Replicas {
 		klog.V(4).Infof("Foo %s replicas: %d, deployment replicas: %d", name, *foo.Spec.Replicas, *deployment.Spec.Replicas)
+		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
+	}
+
+	if foo.Spec.DeploymentImage != deployment.Spec.Template.Spec.Containers[0].Image {
+		klog.V(4).Infof("Foo %s replicas: %d, deployment replicas: %d", name, foo.Spec.DeploymentImage, deployment.Spec.Template.Spec.Containers[0].Image)
 		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
 	}
 
@@ -389,14 +396,11 @@ func (c *Controller) handleObject(obj interface{}) {
 // the appropriate OwnerReferences on the resource so handleObject can discover
 // the Foo resource that 'owns' it.
 func newDeployment(foo *samplev1alpha1.Foo) *appsv1.Deployment {
-	labels := map[string]string{
-		"app":        "nginx",
-		"controller": foo.Name,
-	}
 	return &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      foo.Spec.DeploymentName,
 			Namespace: foo.Namespace,
+			Labels:    foo.Labels,
 			OwnerReferences: []metav1.OwnerReference{
 				*metav1.NewControllerRef(foo, schema.GroupVersionKind{
 					Group:   samplev1alpha1.SchemeGroupVersion.Group,
@@ -408,17 +412,17 @@ func newDeployment(foo *samplev1alpha1.Foo) *appsv1.Deployment {
 		Spec: appsv1.DeploymentSpec{
 			Replicas: foo.Spec.Replicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
+				MatchLabels: foo.Labels,
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: labels,
+					Labels: foo.Labels,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:  "nginx",
-							Image: "nginx:latest",
+							Name:  foo.Spec.DeploymentName,
+							Image: foo.Spec.DeploymentImage,
 						},
 					},
 				},

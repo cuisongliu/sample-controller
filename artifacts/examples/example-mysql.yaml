@@ -1,0 +1,19 @@
+apiVersion: samplecontroller.k8s.io/v1alpha1
+kind: Foo
+metadata:
+  name: nginx
+  namespace: kube-crd
+  labels:
+    app: nginx-controller-simple1
+    controller: nginx-simple1
+spec:
+  deploymentName: nginx
+  deploymentImage: harbor.jerry.com/library/nginx:1.14-alpine
+  replicas: 1
+  mysqlService: mysql.kube-crd
+  mysqlPort: 3306
+  mysqlUsername: admin
+  mysqlPassword: admin
+  mysqlDb: cuisongliu
+
+

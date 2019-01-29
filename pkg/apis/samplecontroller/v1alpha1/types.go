@@ -34,8 +34,14 @@ type Foo struct {
 
 // FooSpec is the spec for a Foo resource
 type FooSpec struct {
-	DeploymentName string `json:"deploymentName"`
-	Replicas       *int32 `json:"replicas"`
+	DeploymentName  string `json:"deploymentName"`
+	Replicas        *int32 `json:"replicas"`
+	DeploymentImage string `json:"deploymentImage"`
+	MysqlService    string `json:"mysqlService"`
+	MysqlPort       *int32 `json:"mysqlPort"`
+	MysqlUsername   string `json:"mysqlUsername"`
+	MysqlPassword   string `json:"mysqlPassword"`
+	MysqlDb         string `json:"mysqlDb"`
 }
 
 // FooStatus is the status for a Foo resource
