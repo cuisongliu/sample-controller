@@ -275,7 +275,6 @@ func (c *Controller) syncHandler(key string) error {
 	// If the resource doesn't exist, we'll create it
 	if errors.IsNotFound(err) {
 		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Create(newDeployment(foo))
-		//创建的逻辑
 		//c.kubeclientset.AppsV1().Deployments(foo.Namespace).Get(foo.Name)
 	}
 
@@ -419,10 +418,61 @@ func newDeployment(foo *samplev1alpha1.Foo) *appsv1.Deployment {
 					Labels: foo.Labels,
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{
+						{
+							Name:    foo.Spec.DeploymentName + "Init",
+							Image:   foo.Spec.DeploymentImage,
+							Command: []string{"ls -l"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "host",
+									Value: foo.Spec.MysqlService,
+								},
+								{
+									Name:  "port",
+									Value: foo.Spec.MysqlPort,
+								},
+								{
+									Name:  "username",
+									Value: foo.Spec.MysqlUsername,
+								},
+								{
+									Name:  "password",
+									Value: foo.Spec.MysqlPassword,
+								},
+								{
+									Name:  "db",
+									Value: foo.Spec.MysqlDb,
+								},
+							},
+						},
+					},
 					Containers: []corev1.Container{
 						{
 							Name:  foo.Spec.DeploymentName,
 							Image: foo.Spec.DeploymentImage,
+							Env: []corev1.EnvVar{
+								{
+									Name:  "host",
+									Value: foo.Spec.MysqlService,
+								},
+								{
+									Name:  "port",
+									Value: foo.Spec.MysqlPort,
+								},
+								{
+									Name:  "username",
+									Value: foo.Spec.MysqlUsername,
+								},
+								{
+									Name:  "password",
+									Value: foo.Spec.MysqlPassword,
+								},
+								{
+									Name:  "db",
+									Value: foo.Spec.MysqlDb,
+								},
+							},
 						},
 					},
 				},

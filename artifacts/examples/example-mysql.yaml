@@ -11,7 +11,7 @@ spec:
   deploymentImage: harbor.jerry.com/library/nginx:1.14-alpine
   replicas: 1
   mysqlService: mysql.kube-crd
-  mysqlPort: 3306
+  mysqlPort: "3306"
   mysqlUsername: admin
   mysqlPassword: admin
   mysqlDb: cuisongliu
