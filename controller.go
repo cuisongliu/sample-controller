@@ -301,11 +301,6 @@ func (c *Controller) syncHandler(key string) error {
 		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
 	}
 
-	if foo.Spec.DeploymentImage != deployment.Spec.Template.Spec.Containers[0].Image {
-		klog.V(4).Infof("Foo %s replicas: %d, deployment replicas: %d", name, foo.Spec.DeploymentImage, deployment.Spec.Template.Spec.Containers[0].Image)
-		deployment, err = c.kubeclientset.AppsV1().Deployments(foo.Namespace).Update(newDeployment(foo))
-	}
-
 	// If an error occurs during Update, we'll requeue the item so we can
 	// attempt processing again later. THis could have been caused by a
 	// temporary network failure, or any other transient reason.
@@ -420,28 +415,28 @@ func newDeployment(foo *samplev1alpha1.Foo) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					InitContainers: []corev1.Container{
 						{
-							Name:    foo.Spec.DeploymentName + "Init",
-							Image:   foo.Spec.DeploymentImage,
-							Command: []string{"ls -l"},
+							Name:  foo.Spec.DeploymentName + "-init",
+							Image: "mysql:8",
+							Command: []string{
+								"/bin/bash",
+								"-c",
+								"mysql -h $mysql_host -u$mysql_username -p$mysql_password -e \"SELECT 1\"",
+							},
 							Env: []corev1.EnvVar{
 								{
-									Name:  "host",
+									Name:  "mysql_host",
 									Value: foo.Spec.MysqlService,
 								},
 								{
-									Name:  "port",
-									Value: foo.Spec.MysqlPort,
-								},
-								{
-									Name:  "username",
+									Name:  "mysql_username",
 									Value: foo.Spec.MysqlUsername,
 								},
 								{
-									Name:  "password",
+									Name:  "mysql_password",
 									Value: foo.Spec.MysqlPassword,
 								},
 								{
-									Name:  "db",
+									Name:  "mysql_db",
 									Value: foo.Spec.MysqlDb,
 								},
 							},
@@ -450,28 +445,29 @@ func newDeployment(foo *samplev1alpha1.Foo) *appsv1.Deployment {
 					Containers: []corev1.Container{
 						{
 							Name:  foo.Spec.DeploymentName,
-							Image: foo.Spec.DeploymentImage,
+							Image: " widdpim/mysql-client",
 							Env: []corev1.EnvVar{
 								{
-									Name:  "host",
+									Name:  "mysql_host",
 									Value: foo.Spec.MysqlService,
 								},
 								{
-									Name:  "port",
-									Value: foo.Spec.MysqlPort,
-								},
-								{
-									Name:  "username",
+									Name:  "mysql_username",
 									Value: foo.Spec.MysqlUsername,
 								},
 								{
-									Name:  "password",
+									Name:  "mysql_password",
 									Value: foo.Spec.MysqlPassword,
 								},
 								{
-									Name:  "db",
+									Name:  "mysql_db",
 									Value: foo.Spec.MysqlDb,
 								},
+							},
+							Command: []string{
+								"/bin/sh",
+								"-c",
+								"mysql -h $mysql_host -u$mysql_username -p$mysql_password -e \"SELECT 1\"",
 							},
 						},
 					},

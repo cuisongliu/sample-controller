@@ -93,6 +93,7 @@ spec:
           set -ex
           rm -rf /var/lib/mysql/lost+found
           cat > /docker-entrypoint-initdb.d/mysql-db-initt.sql <<EOF
+          CREATE USER '$MYSQL_USERNAME'@'%' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';
           create database $MYSQL_DATABASE default character set utf8;
           grant all on $MYSQL_DATABASE.* to '$MYSQL_USERNAME'@'%' identified by '$MYSQL_ROOT_PASSWORD';
           flush privileges;
